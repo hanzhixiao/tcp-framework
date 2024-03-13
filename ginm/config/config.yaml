@@ -1,0 +1,19 @@
+server:
+  name: hzx_server
+  port: 8099
+  ipVersion: "tcp4"
+  ip: "0.0.0.0"
+  globalQueueSize: 1024
+  maxConn: 100
+  IOReadBuffSize: 1024
+worker:
+  workerNum: 10
+  chanSize: 512
+logger:
+  logDir: "./mylog"
+  logFile: "zinx.log"
+  logIsolationLevel: 0
+globalObject:
+  routerSlicesMode: false
+  heartbeatMax: 5
+  mode: "tcp"

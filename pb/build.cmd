@@ -1,0 +1,1 @@
+protoc --proto_path=pb_message --go_out=./pb_message  ./pb_message/message.proto
