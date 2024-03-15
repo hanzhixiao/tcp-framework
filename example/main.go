@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"log"
 	"math"
@@ -46,8 +47,9 @@ type moveRouter struct {
 
 func (pr *moveRouter) Handler(request inter.Request) {
 	player := wm.GetPlayerById(int32(request.GetConn().GetConnID()))
-	msg := request.GetMessage()
-	data := msg.GetData()
+	msg := request.GetResponse()
+	coder := msg.(*coder)
+	data := coder.Body
 	json.Unmarshal(data, player.Json3)
 
 	players := wm.GetAllPlayers()
@@ -65,8 +67,8 @@ func (pr *moveRouter) Handler(request inter.Request) {
 var wm *core.WorldManager
 
 type coder struct {
-	Funcode byte
-	Length  byte
+	Funcode uint32
+	Length  uint32
 	Body    []byte
 }
 
@@ -83,8 +85,11 @@ func (c *coder) GetLengthField() *inter.LengthField {
 func (c *coder) Intercept(chain inter.Chain) inter.IcResp {
 	request := chain.Request()
 	iRequest := request.(inter.Request)
-	c.Body
-	return
+	data := iRequest.GetMessage().GetData()
+	c.Body = data[8:]
+	c.Funcode = binary.BigEndian.Uint32(data[4:8])
+	c.Length = binary.BigEndian.Uint32(data[:4])
+	return c
 }
 
 func main() {
