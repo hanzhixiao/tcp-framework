@@ -11,7 +11,7 @@ worker:
   chanSize: 512
 logger:
   logDir: "./mylog"
-  logFile: "zinx.log"
+  logFile: "hzx.log"
   logIsolationLevel: 0
 globalObject:
   routerSlicesMode: false

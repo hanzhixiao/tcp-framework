@@ -32,6 +32,10 @@ type wsConnection struct {
 	frameDecoder     inter.FrameDecoder
 }
 
+func (w *wsConnection) GetMsgChan() chan []byte {
+	return w.msgChan
+}
+
 func (w *wsConnection) GetMsgHandler() inter.MsgHandler {
 	return w.msgHandler
 }

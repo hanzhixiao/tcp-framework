@@ -30,6 +30,9 @@ type conn struct {
 	frameDecoder     inter.FrameDecoder
 }
 
+func (c *conn) GetMsgChan() chan []byte {
+	return c.msgChan
+}
 func (c *conn) GetMsgHandler() inter.MsgHandler {
 	return c.msgHandler
 }
@@ -241,7 +244,7 @@ func NewConn(server inter.Server, tcpConn *net.TCPConn, connId uint32, msgHandle
 		property:   make(map[string]interface{}),
 	}
 	fieldLength := server.GetFieldLength()
-	if fieldLength == nil {
+	if fieldLength != nil {
 		c.frameDecoder = interceptor.NewFrameDecoder(fieldLength)
 	}
 	return c

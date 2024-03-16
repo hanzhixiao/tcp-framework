@@ -13,68 +13,33 @@ import (
 	"time"
 )
 
-func TestClient1(t *testing.T) {
-	conn, err := net.Dial("tcp", "0.0.0.0:8099")
-	if err != nil {
-		t.Error(err)
-	}
-	fmt.Println("client start successfully")
-	for {
-		message1 := mnet.NewMessage([]byte("Hello ginm"), 10)
-		message1.SetMsgID(1)
-		pack1, _ := message1.Pack()
-		message2 := mnet.NewMessage([]byte("Hello ginm2"), 11)
-		message2.SetMsgID(2)
-		pack2, _ := message2.Pack()
-		pack := append(pack1, pack2...)
-		if _, err := conn.Write(pack); err != nil {
-			fmt.Println("client write err:", err.Error())
-			continue
-		}
-		fmt.Println("client write successfully")
-		buf := make([]byte, 512)
-		if _, err := conn.Read(buf); err != nil {
-			fmt.Println("client read err", err.Error())
-			continue
-		}
-		fmt.Println("client read successfully:", string(buf))
-		time.Sleep(1 * time.Second)
-	}
-	runtime.Goexit()
-}
-
 func TestClient2(t *testing.T) {
-	conn, err := net.Dial("tcp", "0.0.0.0:8099")
+	conn, err := net.Dial("tcp", "0.0.0.0:8999")
 	if err != nil {
-		t.Error(err)
+		fmt.Println("client start err, exit!", err)
+		return
 	}
-	fmt.Println("client start successfully")
-	for {
-		message1 := mnet.NewMessage([]byte("2Hello ginm"), 11)
-		message1.SetMsgID(1)
-		pack1, _ := message1.Pack()
-		message2 := mnet.NewMessage([]byte("2Hello ginm2"), 12)
-		message2.SetMsgID(2)
-		pack2, _ := message2.Pack()
-		pack := append(pack1, pack2...)
-		if _, err := conn.Write(pack); err != nil {
-			fmt.Println("client write err:", err.Error())
-			continue
-		}
-		fmt.Println("client write successfully")
-		buf := make([]byte, 512)
-		if _, err := conn.Read(buf); err != nil {
-			fmt.Println("client read err", err.Error())
-			continue
-		}
-		fmt.Println("client read successfully:", string(buf))
-		time.Sleep(1 * time.Second)
+	message1 := mnet.NewMessage([]byte("ping"), 4)
+	message1.SetMsgID(1)
+	pack, err := message1.Pack()
+	_, err = conn.Write(pack)
+	if err != nil {
+		fmt.Println("write error err ", err)
+		return
 	}
-	runtime.Goexit()
+	fmt.Println("client write successfully")
+	buf := make([]byte, 1024)
+	n, err := conn.Read(buf)
+	if err != nil {
+		fmt.Println("client read err", err.Error())
+		return
+	}
+	fmt.Println("client read successfully:", string(buf[8:n]))
+	time.Sleep(1 * time.Second)
 }
 
 func TestHook(t *testing.T) {
-	conn, err := net.Dial("tcp", "0.0.0.0:8099")
+	conn, err := net.Dial("tcp", "0.0.0.0:8999")
 	if err != nil {
 		t.Error(err)
 	}
@@ -90,7 +55,7 @@ func TestHook(t *testing.T) {
 }
 
 func TestBottleNeck(t *testing.T) {
-	conn, err := net.Dial("tcp", "0.0.0.0:8099")
+	conn, err := net.Dial("tcp", "0.0.0.0:8999")
 	if err != nil {
 		t.Error(err)
 	}
@@ -123,7 +88,7 @@ func TestBottleNeck(t *testing.T) {
 }
 
 func TestHeartBeat(t *testing.T) {
-	conn, err := net.Dial("tcp", "0.0.0.0:8099")
+	conn, err := net.Dial("tcp", "0.0.0.0:8999")
 	if err != nil {
 		t.Error(err)
 	}
@@ -149,7 +114,7 @@ func TestHeartBeat(t *testing.T) {
 }
 
 func TestKcp(t *testing.T) {
-	conn, err := kcp.Dial("0.0.0.0:8099")
+	conn, err := kcp.Dial("0.0.0.0:8999")
 	if err != nil {
 		t.Error(err)
 	}
@@ -179,7 +144,7 @@ func TestKcp(t *testing.T) {
 }
 
 func TestSliceRouter(t *testing.T) {
-	conn, err := net.Dial("tcp", "0.0.0.0:8099")
+	conn, err := net.Dial("tcp", "0.0.0.0:8999")
 	if err != nil {
 		fmt.Println("client start err, exit!", err)
 		return
@@ -204,7 +169,7 @@ func TestSliceRouter(t *testing.T) {
 }
 
 func TestAsynOp(t *testing.T) {
-	conn, err := net.Dial("tcp", "0.0.0.0:8099")
+	conn, err := net.Dial("tcp", "0.0.0.0:8999")
 	if err != nil {
 		fmt.Println("client start err, exit!", err)
 		return
@@ -228,7 +193,7 @@ func TestAsynOp(t *testing.T) {
 	time.Sleep(1 * time.Second)
 }
 func TestIntercept(t *testing.T) {
-	conn, err := net.Dial("tcp", "0.0.0.0:8099")
+	conn, err := net.Dial("tcp", "0.0.0.0:8999")
 	if err != nil {
 		fmt.Println("client start err, exit!", err)
 		return
@@ -253,7 +218,7 @@ func TestIntercept(t *testing.T) {
 }
 
 func TestDecoder(t *testing.T) {
-	conn, err := net.Dial("tcp", "0.0.0.0:8099")
+	conn, err := net.Dial("tcp", "0.0.0.0:8999")
 	if err != nil {
 		fmt.Println("client start err, exit!", err)
 		return
@@ -283,7 +248,7 @@ func TestDecoder(t *testing.T) {
 
 func TestDecoderWebsocket(t *testing.T) {
 	dialer := websocket.Dialer{}
-	conn, _, err := dialer.Dial("ws://0.0.0.0:8099", nil)
+	conn, _, err := dialer.Dial("ws://0.0.0.0:8999", nil)
 	if err != nil {
 		fmt.Println("client start err, exit!", err)
 		return

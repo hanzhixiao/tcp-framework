@@ -6,6 +6,7 @@ import (
 )
 
 type Conn interface {
+	GetMsgChan() chan []byte
 	GetTCPConn() *net.TCPConn
 	GetConnID() uint32
 	GetWsConn() *websocket.Conn

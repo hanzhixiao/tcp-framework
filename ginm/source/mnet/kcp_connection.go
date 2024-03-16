@@ -34,6 +34,10 @@ type kcpConn struct {
 	server           inter.Server
 }
 
+func (k *kcpConn) GetMsgChan() chan []byte {
+	return k.msgChan
+}
+
 func (k *kcpConn) GetMsgHandler() inter.MsgHandler {
 	return k.msgHandler
 }

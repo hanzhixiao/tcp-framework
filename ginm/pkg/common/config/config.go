@@ -1,18 +1,18 @@
 package config
 
 import (
-	"bytes"
-	"flag"
-	"gopkg.in/yaml.v3"
+	"os"
+	"testing"
 	"time"
 )
 
 var cfg *config
 
 func init() {
-
-	configFile := flag.String("config path", "../ginm/config/config.yaml", "path of config.yaml")
-	cfg = newConfig(*configFile)
+	//wd, _ := os.Getwd()
+	//configFile := flag.String("config path", wd+"../../../config/config.yaml", "path of config.yaml")
+	//*configFile
+	cfg = newConfig()
 }
 
 const (
@@ -55,19 +55,43 @@ type logger struct {
 	LogIsolationLevel int    `json:"logIsolationLevel"`
 }
 
-func newConfig(configFile string) *config {
-	conf := &config{}
-	data, err := readConfig(configFile)
+func newConfig() *config {
+	pwd, err := os.Getwd()
 	if err != nil {
-		panic(err)
-		return nil
+		pwd = "."
 	}
-	decoder := yaml.NewDecoder(bytes.NewReader(data))
-	if err := decoder.Decode(conf); err != nil {
-		panic("read config file error")
-		return nil
+
+	// Note: Prevent errors like "flag provided but not defined: -test.paniconexit0" from occurring in go test.
+	// (防止 go test 出现"flag provided but not defined: -test.paniconexit0"等错误)
+	testing.Init()
+
+	// Initialize the GlobalObject variable and set some default values.
+	// (初始化GlobalObject变量，设置一些默认值)
+	return &config{
+		Server: &server{
+			Name:            "Server",
+			IpVersion:       "tcp4",
+			Port:            8999,
+			Ip:              "127.0.0.1",
+			GlobalQueueSize: 1024,
+			MaxConn:         12000,
+			IOReadBuffSize:  1024,
+		},
+		GlobalObject: &globalObject{
+			RouterSlicesMode: false,
+			HeartbeatMax:     5,
+			Mode:             ServerModeTcp,
+		},
+		Logger: &logger{
+			LogDir:            pwd + "/logger",
+			LogFile:           "runningLog.log",
+			LogIsolationLevel: 0,
+		},
+		Worker: &worker{
+			WorkerNum: 10,
+			ChanSize:  1024,
+		},
 	}
-	return conf
 }
 func GetConfig() *config {
 	return cfg

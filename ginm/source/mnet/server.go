@@ -7,6 +7,7 @@ import (
 	"github.com/xtaci/kcp-go"
 	"gopkg.in/yaml.v3"
 	"mmo/ginm/pkg/common/config"
+	"mmo/ginm/source/decoder"
 	"mmo/ginm/source/inter"
 	"mmo/ginm/zlog"
 	"net"
@@ -40,6 +41,9 @@ func (s *server) GetDecoder() inter.Decoder {
 }
 
 func (s *server) GetFieldLength() *inter.LengthField {
+	if s.decoder == nil {
+		return nil
+	}
 	return s.decoder.GetLengthField()
 }
 
@@ -255,10 +259,11 @@ func NewServer() inter.Server {
 		name:        cfg.Server.Name,
 		ipVersion:   cfg.Server.IpVersion,
 		ip:          cfg.Server.Ip,
+		decoder:     decoder.NewTLVDecoder(),
 		msgHandler:  NewMessageHandler(cfg.Worker.WorkerNum),
 		connManager: NewConnManager(),
 		upgrader: &websocket.Upgrader{
-			ReadBufferSize: int(cfg.Server.IOReadBuffSize),
+			ReadBufferSize: cfg.Server.IOReadBuffSize,
 			CheckOrigin: func(r *http.Request) bool {
 				return true
 			},
