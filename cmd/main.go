@@ -5,7 +5,6 @@ import (
 	"mmo/ginm/pkg/utils"
 	"mmo/ginm/source/inter"
 	"mmo/ginm/source/mnet"
-	"mmo/internal/core"
 )
 
 type pingRouter struct {
@@ -63,37 +62,9 @@ func (r *helloRouter) PostHandler(request inter.Request) {
 	}
 }
 
-//func DoStartConn(conn inter.Conn) {
-//	fmt.Println("After conn start-------------------")
-//	conn.SetProperty("hanzhixiao", "nb")
-//	fmt.Println(conn.GetProperty("hanzhixiao"))
-//	conn.Send(202, utils.StringtoSlice("After Conn start msg"))
-//}
-//
-//func DoStopConn(conn inter.Conn) {
-//	fmt.Println("Before conn stop-------------------")
-//	conn.Send(202, utils.StringtoSlice("Before conn stop"))
-//}
-
-func OnConnecionAdd(conn inter.Conn) {
-	player := core.NewPlayer(conn)
-	err := player.SyncPid()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	err = player.BroadCastStartPosition()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-}
 func main() {
 	tcpServer := mnet.NewServer()
-	//tcpServer.SetOnStartConn(DoStartConn)
-	//tcpServer.SetOnStopConn(DoStopConn)
 	tcpServer.AddRouter(1, &pingRouter{})
 	tcpServer.AddRouter(2, &helloRouter{})
-	//tcpServer.StartHeartBeat(time.Second)
 	tcpServer.Serve()
 }
