@@ -99,11 +99,11 @@ func (m *msgHandler) AddRouter(msgType uint32, router inter.Router) {
 }
 
 func (m *msgHandler) doMsgHandler(request inter.Request) {
-	defer func() {
-		if err := recover(); err != nil {
-			zlog.Errorf("workerID: %d doMsgHandler panic: %v", request.GetWorkerID(), err)
-		}
-	}()
+	//defer func() {
+	//	if err := recover(); err != nil {
+	//		zlog.Errorf("workerID: %d doMsgHandler panic: %v", request.GetWorkerID(), err)
+	//	}
+	//}()
 	msgType := request.GetMessageType()
 	handler, ok := m.apis[msgType]
 	_, ok2 := (request).(*RequestFunc)

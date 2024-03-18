@@ -27,7 +27,7 @@ func NewFrameDecoder(lf *inter.LengthField) inter.FrameDecoder {
 		LengthFieldEndOffset: lf.LengthFieldOffset + lf.LengthFieldLength,
 	}
 	if decoder.Order == nil {
-		decoder.Order = binary.BigEndian
+		decoder.Order = binary.LittleEndian
 	}
 	return decoder
 }
@@ -59,7 +59,7 @@ func (f *frameDecoder) decode(in []byte) []byte {
 	if buf.Len() < f.LengthFieldEndOffset {
 		return nil
 	}
-	frameLength := f.getUnadjustedFrameLength(buf, f.LengthFieldOffset, f.LengthFieldLength, binary.BigEndian)
+	frameLength := f.getUnadjustedFrameLength(buf, f.LengthFieldOffset, f.LengthFieldLength, f.Order)
 	if frameLength < 0 {
 		f.failOnNegativeLengthField(buf, frameLength, f.LengthFieldEndOffset)
 	}

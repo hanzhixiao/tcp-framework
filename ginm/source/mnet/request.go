@@ -131,7 +131,7 @@ type RequestFunc struct {
 	workerID int
 }
 
-func (rf *RequestFunc) GetConnection() inter.Conn {
+func (rf *RequestFunc) GetConn() inter.Conn {
 	return rf.conn
 }
 

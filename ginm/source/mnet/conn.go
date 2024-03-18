@@ -165,6 +165,7 @@ func (c *conn) reader() {
 					continue
 				}
 				for _, buff := range bufArrays {
+					fmt.Println(string(buff))
 					msg := NewMessage(buff, uint32(len(buff)))
 					request := NewRequest(msg, c)
 					c.msgHandler.Exec(request)

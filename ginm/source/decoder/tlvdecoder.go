@@ -22,20 +22,20 @@ func NewTLVDecoder() inter.Decoder {
 func (tlv *TLVDecoder) GetLengthField() *inter.LengthField {
 	return &inter.LengthField{
 		MaxFrameLength:      math.MaxUint32 + 4 + 4,
-		LengthFieldOffset:   4,
+		LengthFieldOffset:   0,
 		LengthFieldLength:   4,
-		LengthAdjustment:    0,
+		LengthAdjustment:    4,
 		InitialBytesToStrip: 0,
 	}
 }
 
 func (tlv *TLVDecoder) decode(data []byte) *TLVDecoder {
 	tlvData := TLVDecoder{}
-	tlvData.Tag = binary.BigEndian.Uint32(data[0:4])
-	tlvData.Length = binary.BigEndian.Uint32(data[4:8])
+	tlvData.Length = binary.LittleEndian.Uint32(data[0:4])
+	tlvData.Tag = binary.LittleEndian.Uint32(data[4:8])
 	tlvData.Value = make([]byte, tlvData.Length)
 
-	binary.Read(bytes.NewBuffer(data[8:8+tlvData.Length]), binary.BigEndian, tlvData.Value)
+	binary.Read(bytes.NewBuffer(data[8:8+tlvData.Length]), binary.LittleEndian, tlvData.Value)
 
 	return &tlvData
 }

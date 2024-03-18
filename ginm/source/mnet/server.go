@@ -171,8 +171,8 @@ func (s *server) listenTcpConn() {
 			continue
 		}
 		fmt.Printf("client %s connected\n", conn.RemoteAddr().String())
-		atomic.AddUint32(&s.cid, 1)
 		tcpConn := NewConn(s, conn, s.cid, s.msgHandler)
+		atomic.AddUint32(&s.cid, 1)
 		s.connManager.AddConn(tcpConn)
 		s.startConn(tcpConn)
 	}

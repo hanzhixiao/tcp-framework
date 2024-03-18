@@ -39,16 +39,16 @@ func (m *message) PackHtlvCrc() ([]byte, error) {
 	if err := buf.WriteByte(0xA1); err != nil {
 		return nil, utils.Wrap(err, " ")
 	}
-	if err := binary.Write(buf, binary.BigEndian, uint8(m.msgType)); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, uint8(m.msgType)); err != nil {
 		return nil, utils.Wrap(err, " ")
 	}
-	if err := binary.Write(buf, binary.BigEndian, uint8(m.dataLen)); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, uint8(m.dataLen)); err != nil {
 		return nil, utils.Wrap(err, " ")
 	}
-	if err := binary.Write(buf, binary.BigEndian, m.data); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, m.data); err != nil {
 		return nil, utils.Wrap(err, " ")
 	}
-	if err := binary.Write(buf, binary.BigEndian, decoder.GetCrc(buf.Bytes())); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, decoder.GetCrc(buf.Bytes())); err != nil {
 		return nil, utils.Wrap(err, " ")
 	}
 	return buf.Bytes(), nil
@@ -56,13 +56,13 @@ func (m *message) PackHtlvCrc() ([]byte, error) {
 
 func (m *message) Pack() ([]byte, error) {
 	buf := bytes.NewBuffer([]byte{})
-	if err := binary.Write(buf, binary.BigEndian, m.msgType); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, m.dataLen); err != nil {
 		return nil, utils.Wrap(err, " ")
 	}
-	if err := binary.Write(buf, binary.BigEndian, m.dataLen); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, m.msgType); err != nil {
 		return nil, utils.Wrap(err, " ")
 	}
-	if err := binary.Write(buf, binary.BigEndian, m.data); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, m.data); err != nil {
 		return nil, utils.Wrap(err, " ")
 	}
 	return buf.Bytes(), nil
@@ -70,16 +70,16 @@ func (m *message) Pack() ([]byte, error) {
 
 func (m *message) Unpack(tcpConn net.Conn, wsConn *websocket.Conn, kcpConn *kcp.UDPSession) error {
 	if tcpConn != nil {
-		msgType := make([]byte, 4)
-		if _, err := io.ReadFull(tcpConn, msgType); err != nil {
-			return utils.Wrap(err, "readMsgType failed")
-		}
 		dataLen := make([]byte, 4)
 		if _, err := io.ReadFull(tcpConn, dataLen); err != nil {
 			return utils.Wrap(err, "readDataLen failed")
 		}
-		m.dataLen = binary.BigEndian.Uint32(dataLen)
-		m.msgType = binary.BigEndian.Uint32(msgType)
+		msgType := make([]byte, 4)
+		if _, err := io.ReadFull(tcpConn, msgType); err != nil {
+			return utils.Wrap(err, "readMsgType failed")
+		}
+		m.dataLen = binary.LittleEndian.Uint32(dataLen)
+		m.msgType = binary.LittleEndian.Uint32(msgType)
 		m.data = make([]byte, m.dataLen)
 		if _, err := io.ReadFull(tcpConn, m.data); err != nil {
 			return utils.Wrap(err, "readData failed")
@@ -102,16 +102,16 @@ func (m *message) Unpack(tcpConn net.Conn, wsConn *websocket.Conn, kcpConn *kcp.
 	//	}
 	//}
 	if kcpConn != nil {
-		msgType := make([]byte, 4)
-		if _, err := io.ReadFull(tcpConn, msgType); err != nil {
-			return utils.Wrap(err, "readMsgType failed")
-		}
 		dataLen := make([]byte, 4)
 		if _, err := io.ReadFull(tcpConn, dataLen); err != nil {
 			return utils.Wrap(err, "readDataLen failed")
 		}
-		m.dataLen = binary.BigEndian.Uint32(dataLen)
-		m.msgType = binary.BigEndian.Uint32(msgType)
+		msgType := make([]byte, 4)
+		if _, err := io.ReadFull(tcpConn, msgType); err != nil {
+			return utils.Wrap(err, "readMsgType failed")
+		}
+		m.dataLen = binary.LittleEndian.Uint32(dataLen)
+		m.msgType = binary.LittleEndian.Uint32(msgType)
 		m.data = make([]byte, m.dataLen)
 		if _, err := io.ReadFull(tcpConn, m.data); err != nil {
 			return utils.Wrap(err, "readData failed")

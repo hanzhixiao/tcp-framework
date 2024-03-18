@@ -48,9 +48,12 @@ type moveRouter struct {
 func (pr *moveRouter) Handler(request inter.Request) {
 	player := wm.GetPlayerById(int32(request.GetConn().GetConnID()))
 	msg := request.GetResponse()
-	coder := msg.(*coder)
-	data := coder.Body
-	json.Unmarshal(data, player.Json3)
+	coder := msg.(decoder.TLVDecoder)
+	data := coder.Value
+	if err := json.Unmarshal(data, player.Json3); err != nil {
+		log.Println(err.Error())
+		return
+	}
 
 	players := wm.GetAllPlayers()
 	if player.Json3.State == Person.Attack {
@@ -98,7 +101,7 @@ func main() {
 
 	pr := &moveRouter{}
 	s.AddRouter(201, pr) // 201 移动请求
-	s.SetDecoder(decoder.NewHTLVCRCDecoder())
+	//s.SetDecoder(decoder.NewHTLVCRCDecoder())
 	s.SetOnStartConn(onConnStart)
 	s.SetOnStopConn(onConnStop)
 	s.Serve()
