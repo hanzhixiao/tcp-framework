@@ -60,7 +60,7 @@ go run ,/example/main.go
 ```
 #### 运行客户端
 ```
-./2d_game.exe
+./client/2Dome.exe
 ```
 #### 游戏玩法
 wasd-玩家移动，空格-攻击，shift-加速
