@@ -130,7 +130,11 @@ func (c *conn) Send(msgType uint32, buf []byte) error {
 		fmt.Println("Pack msg err: ", err.Error())
 		return err
 	}
-	c.msgChan <- packData
+	select {
+	case c.msgChan <- packData:
+	case <-c.closedCh:
+		return nil
+	}
 	return nil
 }
 

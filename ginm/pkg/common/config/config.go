@@ -29,8 +29,9 @@ type config struct {
 }
 
 type worker struct {
-	WorkerNum int `yaml:"workerNum"`
-	ChanSize  int `yaml:"chanSize"`
+	WorkerNum int  `yaml:"workerNum"`
+	ChanSize  int  `yaml:"chanSize"`
+	RobMode   bool `yaml:"robMode"`
 }
 
 type server struct {
@@ -90,6 +91,7 @@ func newConfig() *config {
 		Worker: &worker{
 			WorkerNum: 10,
 			ChanSize:  1024,
+			RobMode:   false,
 		},
 	}
 }

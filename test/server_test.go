@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/xtaci/kcp-go"
-	"mmo/ginm/pkg/utils"
 	"mmo/ginm/source/inter"
 	"mmo/ginm/source/mnet"
 	"net"
@@ -274,7 +273,7 @@ func TestDecoderWebsocket(t *testing.T) {
 }
 
 func TestChan(t *testing.T) {
-	chn := utils.NewnChanel(10)
+	chn := mnet.NewnChanel(10)
 	requests := make([]inter.Request, 0)
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -288,5 +287,50 @@ func TestChan(t *testing.T) {
 	chn.Store(requests)
 	time.Sleep(2 * time.Second)
 	chn.Store(requests)
+	wg.Wait()
+}
+
+func BenchmarkRobMode(b *testing.B) {
+	count := 0
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	conn, err := net.Dial("tcp", "0.0.0.0:8999")
+	if err != nil {
+		fmt.Println("client start err, exit!", err)
+		return
+	}
+	go func() {
+		defer wg.Done()
+		for {
+			msg := mnet.NewMessage(make([]byte, 1024), 1024)
+			err := msg.Unpack(conn, nil, nil)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Println("client read successfully:", string(msg.GetData()))
+			count++
+			if count == 200 {
+				b.StopTimer()
+				return
+			}
+		}
+	}()
+	b.StartTimer()
+	for i := 0; i < 100; i++ {
+		message1 := mnet.NewMessage([]byte("ping1"), 5)
+		message1.SetMsgID(1)
+		pack1, err := message1.Pack()
+		message2 := mnet.NewMessage([]byte("ping2"), 5)
+		message2.SetMsgID(2)
+		pack2, err := message2.Pack()
+		pack := append(pack1, pack2...)
+		_, err = conn.Write(pack)
+		if err != nil {
+			fmt.Println("write error err ", err)
+			return
+		}
+		fmt.Println("client write successfully")
+	}
 	wg.Wait()
 }

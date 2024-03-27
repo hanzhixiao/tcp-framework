@@ -1,11 +1,11 @@
-package utils
+package mnet
 
 import (
 	"mmo/ginm/source/inter"
 	"sync"
 )
 
-type nChanel struct {
+type NChanel struct {
 	Cond *sync.Cond
 	//WriteCond *sync.Cond
 	taskQueue []inter.Request
@@ -13,8 +13,8 @@ type nChanel struct {
 	start, end, length, cap int
 }
 
-func NewnChanel(cap int) *nChanel {
-	return &nChanel{
+func NewnChanel(cap int) inter.Nch {
+	return &NChanel{
 		Cond: sync.NewCond(&sync.Mutex{}),
 		//WriteCond: sync.NewCond(&sync.Mutex{}),
 		taskQueue: make([]inter.Request, cap),
@@ -26,7 +26,7 @@ func NewnChanel(cap int) *nChanel {
 	}
 }
 
-func (ch *nChanel) Store(requests []inter.Request) {
+func (ch *NChanel) Store(requests []inter.Request) {
 	requestLen := len(requests)
 	ch.Cond.L.Lock()
 	storedNum := min(requestLen, ch.cap-ch.length)
@@ -53,13 +53,17 @@ func (ch *nChanel) Store(requests []inter.Request) {
 	ch.Cond.L.Unlock()
 }
 
-func (ch *nChanel) GetLength() int {
+func (ch *NChanel) Length() int {
 	ch.Cond.L.Lock()
 	defer ch.Cond.L.Unlock()
 	return ch.length
 }
 
-func (ch *nChanel) Load(n int) []inter.Request {
+func (ch *NChanel) Cap() int {
+	return ch.cap
+}
+
+func (ch *NChanel) Load(n int) []inter.Request {
 	ch.Cond.L.Lock()
 	chLen := ch.length
 	loadNum := min(chLen, n)
@@ -88,8 +92,8 @@ func (ch *nChanel) Load(n int) []inter.Request {
 	return requests
 }
 
-func (ch *nChanel) LoadHalf() []inter.Request {
-	return ch.Load(ch.GetLength() / 2)
+func (ch *NChanel) LoadHalf() []inter.Request {
+	return ch.Load(ch.Length() / 2)
 }
 
 func min(a, b int) int {

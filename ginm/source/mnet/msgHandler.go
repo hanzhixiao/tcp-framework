@@ -7,7 +7,10 @@ import (
 	"mmo/ginm/pkg/common/config"
 	"mmo/ginm/source/inter"
 	"mmo/ginm/zlog"
+	"time"
 )
+
+const rob_interval = time.Microsecond
 
 type msgHandler struct {
 	apis         map[uint32]inter.Router
@@ -66,10 +69,15 @@ func (m *msgHandler) GetWorker(workerId int) inter.Worker {
 }
 
 func (m *msgHandler) StartAllWorker(chanSize int) {
+	cfg := config.GetConfig()
 	for i := 0; i < len(m.workers); i++ {
 		m.workers[i] = NewWorker(chanSize, i)
 		fmt.Println("Worker ", i, " starts...")
-		go m.StartOneWorker(m.workers[i])
+		if !cfg.Worker.RobMode {
+			go m.StartOneWorker(m.workers[i])
+		} else {
+			go m.StartOneRobWorker(m.workers[i])
+		}
 	}
 }
 
@@ -86,17 +94,47 @@ func (m *msgHandler) StartOneWorker(worker inter.Worker) {
 		case <-m.ctx.Done():
 			fmt.Println("Worker ", worker.GetWorkerId(), " stopped...")
 			return
-		default:
-
 		}
 	}
 }
 
-//func (m *msgHandler) robTask(worker inter.Worker) int {
-//	for i := 0; i < 4; i++ {
-//
-//	}
-//}
+func (m *msgHandler) StartOneRobWorker(worker inter.Worker) {
+	conf := config.GetConfig()
+	for {
+		requestQue := worker.GetRobQueue()
+		if requestQue.Length() == 0 && worker.IsTimeToRob() {
+			if m.robTask(worker) == false {
+				worker.SetLastFailTime(time.Now())
+			}
+		}
+		select {
+		default:
+			request := requestQue.Load(1)
+			if !conf.GlobalObject.RouterSlicesMode {
+				m.doMsgHandler(request[0])
+			} else {
+				m.doMsgHandlerSlices(request[0])
+			}
+		case <-m.ctx.Done():
+			fmt.Println("Worker ", worker.GetWorkerId(), " stopped...")
+			return
+		}
+	}
+}
+
+func (m *msgHandler) robTask(worker inter.Worker) bool {
+	workers := m.workers
+	robchan := worker.GetRobQueue()
+	for i := 0; i < 4; i++ {
+		workerId := rand.Intn(len(workers))
+		ch := workers[workerId].GetRobQueue()
+		if ch.Length() > ch.Cap()/2 {
+			robchan.Store(ch.LoadHalf())
+			return true
+		}
+	}
+	return false
+}
 
 func (m *msgHandler) AddRouter(msgType uint32, router inter.Router) {
 	if _, ok := m.apis[msgType]; ok {
@@ -107,11 +145,11 @@ func (m *msgHandler) AddRouter(msgType uint32, router inter.Router) {
 }
 
 func (m *msgHandler) doMsgHandler(request inter.Request) {
-	defer func() {
-		if err := recover(); err != nil {
-			zlog.Errorf("workerID: %d doMsgHandler panic: %v", request.GetWorkerID(), err)
-		}
-	}()
+	//defer func() {
+	//	if err := recover(); err != nil {
+	//		zlog.Errorf("workerID: %d doMsgHandler panic: %v", request.GetWorkerID(), err)
+	//	}
+	//}()
 	msgType := request.GetMessageType()
 	handler, ok := m.apis[msgType]
 	_, ok2 := (request).(*RequestFunc)

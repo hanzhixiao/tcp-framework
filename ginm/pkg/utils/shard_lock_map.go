@@ -6,7 +6,7 @@ import (
 
 var ShardCount = 32
 
-type shardMap struct {
+type ShardMap struct {
 	shards []*singleShard
 	hash   IHash
 }
@@ -16,8 +16,8 @@ type singleShard struct {
 	sync.RWMutex
 }
 
-func NewShardMap() *shardMap {
-	slm := &shardMap{
+func NewShardMap() *ShardMap {
+	slm := &ShardMap{
 		shards: make([]*singleShard, ShardCount),
 		hash:   DefaultHash(),
 	}
@@ -30,18 +30,18 @@ func NewShardMap() *shardMap {
 	return slm
 }
 
-func (slm *shardMap) GetShard(key string) *singleShard {
+func (slm *ShardMap) GetShard(key string) *singleShard {
 	return slm.shards[slm.hash.Sum(key)%uint32(ShardCount)]
 }
 
-func (slm *shardMap) Set(key string, value interface{}) {
+func (slm *ShardMap) Set(key string, value interface{}) {
 	shard := slm.GetShard(key)
 	shard.Lock()
 	shard.items[key] = value
 	shard.Unlock()
 }
 
-func (slm *shardMap) Count() int {
+func (slm *ShardMap) Count() int {
 	count := 0
 	for i := 0; i < ShardCount; i++ {
 		slm.shards[i].Lock()
@@ -51,7 +51,7 @@ func (slm *shardMap) Count() int {
 	return count
 }
 
-func (slm *shardMap) Has(key string) bool {
+func (slm *ShardMap) Has(key string) bool {
 	shard := slm.GetShard(key)
 	shard.RLock()
 	_, ok := shard.items[key]
@@ -59,7 +59,7 @@ func (slm *shardMap) Has(key string) bool {
 	return ok
 }
 
-func (slm *shardMap) Get(key string) (interface{}, bool) {
+func (slm *ShardMap) Get(key string) (interface{}, bool) {
 	shard := slm.GetShard(key)
 	shard.RLock()
 	val, ok := shard.items[key]
@@ -72,7 +72,7 @@ type tuple struct {
 	value interface{}
 }
 
-func (slm *shardMap) Iterators() <-chan tuple {
+func (slm *ShardMap) Iterators() <-chan tuple {
 	chanList := snapshot(slm)
 	total := 0
 	for _, c := range chanList {
@@ -98,7 +98,7 @@ func fanIn(chanList []chan tuple, out chan tuple) {
 	close(out)
 }
 
-func snapshot(slm *shardMap) []chan tuple {
+func snapshot(slm *ShardMap) []chan tuple {
 	chanList := make([]chan tuple, ShardCount)
 	wg := sync.WaitGroup{}
 	wg.Add(ShardCount)
@@ -121,7 +121,7 @@ func snapshot(slm *shardMap) []chan tuple {
 	return chanList
 }
 
-func (slm *shardMap) Items() map[string]interface{} {
+func (slm *ShardMap) Items() map[string]interface{} {
 	tmp := make(map[string]interface{})
 
 	for item := range slm.Iterators() {
@@ -131,7 +131,7 @@ func (slm *shardMap) Items() map[string]interface{} {
 	return tmp
 }
 
-func (slm *shardMap) Keys() []string {
+func (slm *ShardMap) Keys() []string {
 	count := slm.Count()
 	ch := make(chan string, count)
 	go func() {

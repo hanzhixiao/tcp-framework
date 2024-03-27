@@ -9,6 +9,7 @@ server:
 worker:
   workerNum: 10
   chanSize: 512
+  robMode: false
 logger:
   logDir: "./mylog"
   logFile: "hzx.log"
