@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/xtaci/kcp-go"
+	"mmo/ginm/pkg/utils"
 	"mmo/ginm/source/inter"
 	"mmo/ginm/source/mnet"
 	"net"
@@ -270,4 +271,22 @@ func TestDecoderWebsocket(t *testing.T) {
 	}
 	fmt.Println("client read successfully:", string(p))
 	time.Sleep(1 * time.Second)
+}
+
+func TestChan(t *testing.T) {
+	chn := utils.NewnChanel(10)
+	requests := make([]inter.Request, 0)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	for i := 0; i < 11; i++ {
+		requests = append(requests, mnet.NewRequest(nil, mnet.NewConn(mnet.NewServer(), nil, uint32(i), nil)))
+	}
+	go func() {
+		fmt.Println(chn.Load(15))
+		wg.Done()
+	}()
+	chn.Store(requests)
+	time.Sleep(2 * time.Second)
+	chn.Store(requests)
+	wg.Wait()
 }

@@ -86,9 +86,17 @@ func (m *msgHandler) StartOneWorker(worker inter.Worker) {
 		case <-m.ctx.Done():
 			fmt.Println("Worker ", worker.GetWorkerId(), " stopped...")
 			return
+		default:
+
 		}
 	}
 }
+
+//func (m *msgHandler) robTask(worker inter.Worker) int {
+//	for i := 0; i < 4; i++ {
+//
+//	}
+//}
 
 func (m *msgHandler) AddRouter(msgType uint32, router inter.Router) {
 	if _, ok := m.apis[msgType]; ok {
@@ -99,11 +107,11 @@ func (m *msgHandler) AddRouter(msgType uint32, router inter.Router) {
 }
 
 func (m *msgHandler) doMsgHandler(request inter.Request) {
-	//defer func() {
-	//	if err := recover(); err != nil {
-	//		zlog.Errorf("workerID: %d doMsgHandler panic: %v", request.GetWorkerID(), err)
-	//	}
-	//}()
+	defer func() {
+		if err := recover(); err != nil {
+			zlog.Errorf("workerID: %d doMsgHandler panic: %v", request.GetWorkerID(), err)
+		}
+	}()
 	msgType := request.GetMessageType()
 	handler, ok := m.apis[msgType]
 	_, ok2 := (request).(*RequestFunc)

@@ -17,9 +17,9 @@ import (
 type pingRouter struct {
 	mnet.BaseRouter
 }
-func (r *pingRouter) Handler(request inter.Request) {
-	data := append(request.GetMessage().GetData(), utils.StringtoSlice("Handler\n")...)
-	if err := request.GetConn().Send(request.GetMessage().GetMsgType(), data); err != nil {
+func (r *pingRouter) Handler(requests inter.Request) {
+	data := append(requests.GetMessage().GetData(), utils.StringtoSlice("Handler\n")...)
+	if err := requests.GetConn().Send(requests.GetMessage().GetMsgType(), data); err != nil {
 		fmt.Println("Handler error:", err.Error())
 		return
 	}

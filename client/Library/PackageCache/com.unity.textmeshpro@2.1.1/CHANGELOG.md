@@ -439,7 +439,7 @@ These are the release notes for the TextMesh Pro UPM package which was first int
 - Fixed incorrect detection / handling of Asset Serialization mode in the Project Conversion Utility.
 - Removed SelectionBase attribute from TMP components.
 - Revised TMP Shaders to support the new UNITY_UI_CLIP_RECT shader keyword which can provide a performance improvement of up to 30% on some devices.
-- Added TMP_PRESENT define as per the request of several third party asset publishers.
+- Added TMP_PRESENT define as per the requests of several third party asset publishers.
 
 ## [1.0.23] - 2017-11-14
 ### Added
