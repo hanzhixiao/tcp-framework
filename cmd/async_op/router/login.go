@@ -20,11 +20,8 @@ func (hr *LoginRouter) Handler(request inter.Request) {
 
 	asyncResult := async_op_apis.AsyncUserSaveData(request) // // Test DB asynchronous operation(测试DB异步操作)
 
-	// 测试：执行了一大推业务逻辑,才设置回调函数
-	// Test: A lot of business logic is executed before setting the callback function
 	time.Sleep(1 * time.Second)
 
-	// Asynchronous callback (异步回调)
 	asyncResult.OnComplete(func() {
 		zlog.Debug("OnComplete IN===>333")
 		returnedObj := asyncResult.GetAsyncOpResult()

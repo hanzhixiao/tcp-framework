@@ -22,7 +22,7 @@ func (r *Router2) Handler(request inter.Request) {
 }
 
 func (r *Router1) Handler(request inter.Request) {
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
 	if err := request.GetConn().Send(2, []byte("pong10")); err != nil {
 		fmt.Println("Handler error:", err.Error())
 		return

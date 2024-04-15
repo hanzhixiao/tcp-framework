@@ -37,10 +37,8 @@ func (c *chainBuilder) Execute(request inter.IcReq) inter.IcResp {
 		interceptors = append(interceptors, c.tail)
 	}
 
-	// Create a new interceptor chain and execute each interceptor
 	chain := NewChain(request, 0, interceptors)
 
-	// Execute the chain
 	return chain.Proceed(request)
 }
 

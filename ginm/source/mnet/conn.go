@@ -190,7 +190,8 @@ func (c *conn) writer() {
 	fmt.Println("Writer goroutine for ", c.tcpConn.RemoteAddr().String(), " starts")
 	for {
 		select {
-		case msg := <-c.msgChan:
+		default:
+			msg := <-c.msgChan
 			if _, err := c.tcpConn.Write(msg); err != nil {
 				fmt.Println("Server writes tcp err:", err.Error())
 				return

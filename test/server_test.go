@@ -316,7 +316,7 @@ func BenchmarkRobMode(b *testing.B) {
 			}
 		}
 	}()
-	b.StartTimer()
+	b.ResetTimer()
 	for i := 0; i < 100; i++ {
 		message1 := mnet.NewMessage([]byte("ping1"), 5)
 		message1.SetMsgID(1)
